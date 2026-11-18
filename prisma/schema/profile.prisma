@@ -1,0 +1,14 @@
+model Profile {
+  id          Int          @id @default(autoincrement())
+  firstName   String       @map("first_name")
+  lastName    String       @map("last_name")
+  email       String       @unique
+  urls        String[]
+  description String?
+  experience  Experience[]
+  projects    Project[]
+  skills      Skill[]
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  @@map("profile")
+}

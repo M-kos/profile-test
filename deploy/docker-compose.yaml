@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:17.4
+    env_file:
+      - ../.env
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    stop_grace_period: 30s
+    networks:
+      - profile-network
+
+  migrate:
+    build:
+      context: ..
+      dockerfile: deploy/profile/Dockerfile
+      target: builder
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed"
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - profile-network
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/profile/Dockerfile
+      target: app
+    container_name: profile-app
+    restart: unless-stopped
+    ports:
+      - ${PROFILE_PORT:-8080}:${PROFILE_PORT:-8080}
+    env_file:
+      - ../.env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - profile-network
+
+volumes:
+  postgres_data:
+
+networks:
+  profile-network:
+    driver: bridge
