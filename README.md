@@ -397,6 +397,81 @@ query GetFullProfile {
 }
 ```
 
+## Запуск проекта
+
+### 1. Настройка окружения
+
+Создайте `.env` в корне проекта на основе `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Укажите необходимые переменные окружения.
+
+### 2. Генерация Prisma Client
+
+Сгенерируйте Prisma Client и TypeScript-типы:
+
+```bash
+npm install
+npx prisma generate
+```
+
+### 3. Запуск PostgreSQL
+
+```bash
+docker compose --env-file ./.env -f ./deploy/docker-compose.yaml up -d postgres
+```
+
+либо:
+
+```bash
+task docker:up:local
+```
+
+### 4. Применение миграций
+
+```bash
+docker compose --env-file ./.env -f ./deploy/docker-compose.yaml up migrate
+```
+
+либо:
+
+```bash
+npm run migrate:dev
+```
+
+### 5. Запуск приложения
+
+```bash
+docker compose --env-file ./.env -f ./deploy/docker-compose.yaml up -d --build
+```
+
+либо:
+
+```bash
+task docker:up
+```
+
+### GraphQL endpoint:
+
+```text
+http://localhost:3000/graphql
+```
+
+### Остановка проекта
+
+```bash
+docker compose --env-file ./.env -f ./deploy/docker-compose.yaml down
+```
+
+либо:
+
+```bash
+task docker:down
+```
+
 ## Локальная разработка
 
 Установка зависимостей:
